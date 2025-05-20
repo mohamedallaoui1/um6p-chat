@@ -14,7 +14,7 @@ import BotAnswerAnimated from "./BotAnswerAnimated.tsx";
 import CubeRotation from "./CubeRotation.tsx";
 import gsap from "gsap";
 import { FaCirclePlus } from "react-icons/fa6";
-
+import um6pBg from "../assets/um6pBG.svg"
 // const API_BASE_URL = "http://localhost:5001";
 const API_BASE_URL = "https://bk-chatbot.cleverlytics.site";
 const axiosInstance = axios.create({
@@ -466,7 +466,7 @@ function Chat({ onMessageChange }: ChatProps) {
                   <>
                     <div className="absolute top-0 left-0 right-0 h-1/2 overflow-hidden">
                       <img 
-                        src="/src/assets/um6pBG.svg" 
+                        src={um6pBg} 
                         alt="UM6P Background" 
                         className="w-full h-full object-contain bg-orange-600 select-none"
                       />
