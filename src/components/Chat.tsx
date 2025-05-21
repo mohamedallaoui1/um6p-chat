@@ -529,6 +529,7 @@ function Chat({ onMessageChange }: ChatProps) {
                           message.text
                         )}
                         {message.sender === "bot" && !isLoading && !isAnimating && ( // Hide reactions while loading/animating next msg
+                        <>
                           <div className="flex gap-2 mt-2">
                             <button
                               className={`p-1 transition-colors duration-200 ${
@@ -566,6 +567,8 @@ function Chat({ onMessageChange }: ChatProps) {
                               <span className="text-sm">Feedback</span>
                             </button>
                           </div>
+                          <div className="text-[10px] text-gray-400 mt-1 italic whitespace-nowrap">AI assistant may make mistakes.<br/>Please verify answers from trusted sources.</div>
+                          </>
                         )}
                         {showFeedbackBox[index] && (
                           <>
@@ -628,7 +631,7 @@ function Chat({ onMessageChange }: ChatProps) {
                 type="text"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                placeholder="Talk with AIDA . . ."
+                placeholder="Talk with AI Assistant . . ."
                 className="overflow-hidden w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#EF6A36] 
                           text-gray-900 disabled:text-[#efebdd] disabled:cursor-not-allowed bg-white disabled:bg-[#e0dacd]"
                 disabled={!isConnected || isLoading || isAnimating}

@@ -146,15 +146,27 @@ const ChatPopupAnimation = () => {
     setIsAnimationComplete(false);
 
     playOutroAnimation(() => {
+      const isMobile = window.innerWidth < 640;
+      const finalRight = isMobile ? '20px' : '20px'; // Maintain consistent right spacing
+
       gsap.timeline({ onComplete: () => setIsOpen(false) })
-        .to(container, { height: '60px', duration: 0.4, ease: 'power2.inOut' })
+        .to(container, { 
+          height: '60px', 
+          duration: 0.4, 
+          ease: 'power2.inOut' 
+        })
         .to(container, {
           width: '60px',
+          right: finalRight,  // Add right position adjustment
           borderRadius: '12px',
           duration: 0.4,
           ease: 'power2.inOut',
         })
-        .to(container, { bottom: '20px', duration: 0.3, ease: 'power2.inOut' });
+        .to(container, { 
+          bottom: '20px', 
+          duration: 0.3, 
+          ease: 'power2.inOut' 
+        });
     });
   }, []);
 
@@ -167,7 +179,7 @@ const ChatPopupAnimation = () => {
       height: '60px',
       position: 'fixed',
       bottom: '20px',
-      right: '20px',
+      right: '20px',  // Consistent with final position
       borderRadius: '12px',
       backgroundColor: '#ea580c',
       cursor: 'pointer',
