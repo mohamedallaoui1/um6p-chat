@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { gsap } from 'gsap';
 import Chat from './Chat';
-import { FaPaperPlane } from 'react-icons/fa';
+import { BsChatDots } from 'react-icons/bs';
 import { IoIosArrowDown } from 'react-icons/io';
 
 const ChatPopupAnimation = () => {
@@ -9,6 +9,7 @@ const ChatPopupAnimation = () => {
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const [hasMessages, setHasMessages] = useState(false);
   const [showOverlayText, setShowOverlayText] = useState<string | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -27,7 +28,7 @@ const ChatPopupAnimation = () => {
     const overlay = overlayRef.current;
     if (!overlay) return;
 
-    setShowOverlayText('Hello, I am your AI assistant');
+    setShowOverlayText('Hello, I am your AI assistant!');
 
     gsap.set(overlay, {
       opacity: 0,
@@ -78,8 +79,9 @@ const ChatPopupAnimation = () => {
 
   const openChat = () => {
     const container = containerRef.current;
-    if (!container) return;
+    if (!container || isAnimating) return;
 
+    setIsAnimating(true);
     setIsOpen(true);
     setIsAnimationComplete(false);
 
@@ -87,7 +89,9 @@ const ChatPopupAnimation = () => {
 
     gsap.timeline({
       onComplete: () => {
-        playIntroAnimation(() => {});
+        playIntroAnimation(() => {
+          setIsAnimating(false);
+        });
       },
     })
       .to(container, { bottom: 0, duration: 0.3, ease: 'power2.inOut' })
@@ -141,49 +145,108 @@ const ChatPopupAnimation = () => {
   const closeChat = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     const container = containerRef.current;
-    if (!container) return;
+    const chatContainer = chatContainerRef.current;
+    if (!container || isAnimating) return;
 
+    setIsAnimating(true);
     setIsAnimationComplete(false);
 
-    playOutroAnimation(() => {
-      const isMobile = window.innerWidth < 640;
-      const finalRight = isMobile ? '20px' : '20px'; // Maintain consistent right spacing
-
-      gsap.timeline({ onComplete: () => setIsOpen(false) })
-        .to(container, { 
-          height: '60px', 
-          duration: 0.4, 
-          ease: 'power2.inOut' 
+    // First fade out chat container
+    if (chatContainer) {
+      gsap.to(chatContainer, {
+        opacity: 0,
+        duration: 0.3,
+        ease: 'power2.inOut',
+        onComplete: () => {
+          playOutroAnimation(() => {
+            gsap.timeline({ 
+              onComplete: () => {
+                // Reset chat container opacity for next opening
+                gsap.set(chatContainer, { opacity: 1 });
+                
+                // Ensure container is fully visible and reset any lingering properties
+                gsap.set(container, { 
+                  opacity: 1, 
+                  visibility: 'visible',
+                  display: 'block'
+                });
+                setIsOpen(false);
+                setIsAnimating(false);
+              }
+            })
+              .to(container, { 
+                height: '50px', 
+                duration: 0.4, 
+                ease: 'power2.inOut' 
+              })
+              .to(container, {
+                width: '40px',
+                right: '0px',
+                borderRadius: '30px 0 0 30px',
+                duration: 0.4,
+                ease: 'power2.inOut',
+              })
+              .to(container, { 
+                bottom: '20px', 
+                duration: 0.3, 
+                ease: 'power2.inOut' 
+              });
+          });
+        }
+      });
+    } else {
+      playOutroAnimation(() => {
+        gsap.timeline({ 
+          onComplete: () => {
+            // Ensure container is fully visible and reset any lingering properties
+            gsap.set(container, { 
+              opacity: 1, 
+              visibility: 'visible',
+              display: 'block'
+            });
+            setIsOpen(false);
+            setIsAnimating(false);
+          }
         })
-        .to(container, {
-          width: '60px',
-          right: finalRight,  // Add right position adjustment
-          borderRadius: '12px',
-          duration: 0.4,
-          ease: 'power2.inOut',
-        })
-        .to(container, { 
-          bottom: '20px', 
-          duration: 0.3, 
-          ease: 'power2.inOut' 
-        });
-    });
-  }, []);
+          .to(container, { 
+            height: '50px', 
+            duration: 0.4, 
+            ease: 'power2.inOut' 
+          })
+          .to(container, {
+            width: '40px',
+            right: '0px',
+            borderRadius: '30px 0 0 30px',
+            duration: 0.4,
+            ease: 'power2.inOut',
+          })
+          .to(container, { 
+            bottom: '20px', 
+            duration: 0.3, 
+            ease: 'power2.inOut' 
+          });
+      });
+    }
+  }, [isAnimating]);
 
   const applyInitialStyles = () => {
     const container = containerRef.current;
     if (!container) return;
 
     gsap.set(container, {
-      width: '60px',
-      height: '60px',
+      width: '40px',
+      height: '50px',
       position: 'fixed',
       bottom: '20px',
-      right: '20px',  // Consistent with final position
-      borderRadius: '12px',
+      right: '0px',  // Consistent with final position
+      borderRadius: '30px 0 0 30px',
       backgroundColor: '#ea580c',
       cursor: 'pointer',
       overflow: 'hidden',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+      opacity: 1,
+      visibility: 'visible',
+      display: 'block'
     });
   };
 
@@ -220,8 +283,8 @@ const ChatPopupAnimation = () => {
         {/* Overlay */}
         <div
           ref={overlayRef}
-          className="absolute inset-0 bg-orange-500/90 flex items-center justify-center z-30 rounded-xl backdrop-blur-sm"
-          style={{ display: 'none' }}
+          className="absolute inset-0 bg-orange-500/90 flex items-center justify-center z-30 backdrop-blur-sm"
+          style={{ display: 'none', borderRadius: 'inherit' }}
         >
           <p className="text-white text-lg sm:text-xl font-medium text-center px-4 leading-relaxed">
             {showOverlayText}
@@ -231,7 +294,8 @@ const ChatPopupAnimation = () => {
         {isOpen ? (
           <div
             ref={chatContainerRef}
-            className="absolute inset-0 bg-[#efebdd] rounded-t-xl overflow-hidden z-10 opacity-0 chat-container"
+            className="absolute inset-0 bg-[#efebdd] overflow-hidden z-10 opacity-0 chat-container"
+            style={{ borderRadius: 'inherit' }}
           >
             {isAnimationComplete && (
               <>
@@ -251,8 +315,8 @@ const ChatPopupAnimation = () => {
             )}
           </div>
         ) : (
-          <div className="w-full h-full flex items-center justify-center cursor-pointer">
-            <FaPaperPlane className="text-white text-2xl transform -rotate-45" />
+          <div className="w-full h-full flex items-center justify-center cursor-pointer bg-orange-600" style={{borderRadius: '30px 0 0 30px'}}>
+            <BsChatDots className="text-white text-2xl" />
           </div>
         )}
       </div>
